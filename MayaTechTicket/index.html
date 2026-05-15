@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>MayaTech</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+<!-- Logo y cabecera -->
+  <div class="text-center mb-3">
+    <img src="Mayatech2.png" class="img-fluid" style="max-width: 120px;" alt="Logo MayaTéch">
+    <h3 class="mt-2">MAYATÉCH</h3>
+    <p class="font-weight-bold mb-0">Software, Redes, Seguridad e Ingeniería</p>
+    <small class="text-muted">Tecnología y seguridad al alcance de todos</small>
+  </div>
+
+  <h3>Generar Ticket</h3>
+  <input type="date" id="fecha">
+  <hr>
+    <form id="formulario">
+
+  <!-- Datos del cliente -->
+  <h4>Datos del Cliente</h4>
+  <div class="form-row mb-2">
+    <div class="col">
+      <input type="text" class="form-control" placeholder="Nombre Cliente" id="ClienteNombre">
+    </div>
+    <div class="col">
+      <input type="text" class="form-control" placeholder="Teléfono" id="ClienteTelefono">
+    </div>
+  </div>
+  <div class="form-row mb-2">
+    <div class="col">
+      <input type="text" class="form-control" placeholder="Dirección" id="ClienteDireccion">
+    </div>
+    <div class="col">
+      <select class="form-control" id="FormaPago">
+        <option value="">Forma de Pago</option>
+        <option value="Efectivo">Efectivo</option>
+        <option value="Tarjeta">Tarjeta</option>
+        <option value="Transferencia">Transferencia</option>
+      </select>
+    </div>
+  </div>
+  <hr>
+  
+  
+    <div id="contenedorCampos">
+      <!-- Fila inicial -->
+      <div class="form-row mb-2">
+        <div class="col">
+          <input type="text" class="form-control" placeholder="Nombre" id="Nombre_1">
+        </div>
+        <div class="col">
+          <input type="number" class="form-control" placeholder="Cantidad" id="Cantidad_1" oninput="calcularTotal()">
+        </div>
+        <div class="col">
+          <input type="number" class="form-control" placeholder="Precio" id="Precio_1" oninput="calcularTotal()">
+        </div>
+        <div class="col">
+          <input type="text" class="form-control" placeholder="Subtotal" id="Subtotal_1" readonly>
+        </div>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-success mb-3" onclick="agregarFila()">Agregar fila</button>
+    <br>
+    <h4>Total General: Q<span id="totalGeneral">0</span></h4>
+    <br>
+    <button type="submit" class="btn btn-primary">Generar Ticket</button>
+    <button type="button" class="btn btn-danger" onclick="NuevaTicket()">Nuevo</button>
+  </form>
+</div>
+
+<script>
+
+
+
+
+let contador = 1;
+
+function agregarFila() {
+  contador++;
+  const contenedor = document.getElementById("contenedorCampos");
+  const fila = document.createElement("div");
+  fila.classList.add("form-row","mb-2");
+  fila.innerHTML = `
+    <div class="col">
+      <input type="text" class="form-control" placeholder="Nombre" id="Nombre_${contador}">
+    </div>
+    <div class="col">
+      <input type="number" class="form-control" placeholder="Cantidad" id="Cantidad_${contador}" oninput="calcularTotal()">
+    </div>
+    <div class="col">
+      <input type="number" class="form-control" placeholder="Precio" id="Precio_${contador}" oninput="calcularTotal()">
+    </div>
+    <div class="col">
+      <input type="text" class="form-control" placeholder="Subtotal" id="Subtotal_${contador}" readonly>
+    </div>
+  `;
+  contenedor.appendChild(fila);
+}
+
+function calcularTotal(){
+  let total = 0;
+  for (let i = 1; i <= contador; i++) {
+    const cantidad = parseFloat(document.getElementById("Cantidad_" + i)?.value) || 0;
+    const precio = parseFloat(document.getElementById("Precio_" + i)?.value) || 0;
+    const subtotal = cantidad * precio;
+    if(document.getElementById("Subtotal_" + i)){
+      document.getElementById("Subtotal_" + i).value = subtotal.toFixed(2);
+    }
+    total += subtotal;
+  }
+  document.getElementById("totalGeneral").textContent = total.toFixed(2);
+}
+
+function NuevaTicket(){
+  document.getElementById("contenedorCampos").innerHTML = "";
+  contador = 0;
+  agregarFila();
+  document.getElementById("totalGeneral").textContent = "0";
+  localStorage.clear();
+}
+
+const formulario = document.getElementById("formulario");
+formulario.onsubmit = function(event) {
+  event.preventDefault();
+
+  const productos = [];
+  let total = 0;
+
+  for (let i = 1; i <= contador; i++) {
+    const nombre = document.getElementById("Nombre_" + i).value;
+    const cantidad = parseFloat(document.getElementById("Cantidad_" + i).value) || 0;
+    const precio = parseFloat(document.getElementById("Precio_" + i).value) || 0;
+    const subtotal = cantidad * precio;
+
+    if(nombre){
+      productos.push({nombre, cantidad, precio, subtotal});
+      total += subtotal;
+    }
+  }
+  const cliente = {
+    nombre: document.getElementById("ClienteNombre").value,
+    telefono: document.getElementById("ClienteTelefono").value,
+    direccion: document.getElementById("ClienteDireccion").value,
+    formaPago: document.getElementById("FormaPago").value
+  };
+
+  // Guardar cliente
+  localStorage.setItem("Cliente", JSON.stringify(cliente));
+
+const Fecha = document.getElementById("fecha").value;
+  localStorage.setItem("Productos", JSON.stringify(productos));
+  localStorage.setItem("Total", total);
+  localStorage.setItem("Fecha", Fecha);
+  // Redirigir a Ticket.html
+  window.location.href = "Ticket.html";
+
+
+}
+
+
+
+</script>
+</body>
+</html>
